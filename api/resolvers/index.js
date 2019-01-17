@@ -24,7 +24,7 @@ const { UploadScalar, DateScalar } = require('../custom-types');
 module.exports = app => {
   return {
     // Upload: UploadScalar,
-    // Date: DateScalar,
+    Date: DateScalar,
 
     Query: {
       viewer() {
@@ -52,7 +52,7 @@ module.exports = app => {
           throw new ApolloError(e);
         }
       },
-      async items(id) {
+      async items(parent, { id }, { pgResource }) {
         try {
           const item = await pgResource.getItems(id);
           return item;
@@ -63,7 +63,7 @@ module.exports = app => {
 
         // -------------------------------
       },
-      async tags() {
+      async tags(parent, { id }, { pgResource }) {
         // @TODO: Replace this mock return statement with the correct tags from Postgres
         try {
           const tag = await pgResource.getTags();
@@ -142,9 +142,9 @@ module.exports = app => {
       //   }
       // }
       // -------------------------------
-    },
+    }
 
-    Mutation: {
+    /* Mutation: {
       // @TODO: Uncomment this later when we add auth
       // ...authMutations(app),
       // -------------------------------
@@ -161,7 +161,7 @@ module.exports = app => {
          *
          *  Again, you may look at the user resolver for an example of what
          *  destructuring should look like.
-         */
+         *
 
         image = await image;
         const user = await jwt.decode(context.token, app.get('JWT_SECRET'));
@@ -173,5 +173,6 @@ module.exports = app => {
         return newItem;
       }
     }
+    */
   };
 };

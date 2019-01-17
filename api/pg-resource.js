@@ -99,19 +99,18 @@ module.exports = postgres => {
       // -------------------------------
     },
     async getItems(idToOmit) {
+      /**
+       *  @TODO: Advanced queries
+       *
+       *  Get all Items. If the idToOmit parameter has a value,
+       *  the query should only return Items were the ownerid column
+       *  does not contain the 'idToOmit'
+       *
+       *  Hint: You'll need to use a conditional AND and WHERE clause
+       *  to your query text using string interpolation
+       */
       try {
         const items = await postgres.query({
-          /**
-           *  @TODO: Advanced queries
-           *
-           *  Get all Items. If the idToOmit parameter has a value,
-           *  the query should only return Items were the ownerid column
-           *  does not contain the 'idToOmit'
-           *
-           *  Hint: You'll need to use a conditional AND and WHERE clause
-           *  to your query text using string interpolation
-           */
-
           text: `SELECT * FROM items WHERE ownerid=Value($1);`,
           values: idToOmit ? [idToOmit] : []
         });
@@ -121,11 +120,11 @@ module.exports = postgres => {
       }
     },
     async getItemsForUser(id) {
+      /**
+       *  @TODO: Advanced queries
+       *  Get all Items. Hint: You'll need to use a LEFT INNER JOIN among others
+       */
       const items = await postgres.query({
-        /**
-         *  @TODO: Advanced queries
-         *  Get all Items. Hint: You'll need to use a LEFT INNER JOIN among others
-         */
         text: `SELECT * FROM items WHERE ownerid=Value($1) AND borrowerid is null;`,
         values: [id]
       });
@@ -133,18 +132,18 @@ module.exports = postgres => {
       return items.rows;
     },
     async getBorrowedItemsForUser(id) {
+      /**
+       *  @TODO: Advanced queries
+       *  Get all Items. Hint: You'll need to use a LEFT INNER JOIN among others
+       */
       const items = await postgres.query({
-        /**
-         *  @TODO: Advanced queries
-         *  Get all Items. Hint: You'll need to use a LEFT INNER JOIN among others
-         */
         text: `SELECT * FROM items WHERE borrowerid=Value($1);`,
         values: [id]
       });
       return items.rows;
     },
     async getTags() {
-      const tags = await postgres.query({ text: `SELECT * from tags;` });
+      const tags = await postgres.query({ text: `SELECT * FROM tags;` });
       return tags.rows;
     },
     async getTagsForItem(id) {

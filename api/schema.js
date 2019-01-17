@@ -72,6 +72,6 @@ module.exports = gql`
 
   type Mutation {
     addItem(item: NewItemInput!): Item
-    addDate(date: NewDateInput): Date
+    addDate(date: NewDateInput!): Date
   }
 `;

@@ -1,13 +1,13 @@
 const strs = require('stringstream');
 
-function tagsQueryString(tags, itemid, result) {
+const tagsQueryString = (tags, itemid, result) => {
   /**
    * Challenge:
    * This function is recursive, and a little complicated.
    * Can you refactor it to be simpler / more readable?
    */
-  const length = tags.length;
-  return length === 0
+
+  return tags.length === 0
     ? `${result};`
     : tags.shift() &&
         tagsQueryString(
@@ -15,7 +15,7 @@ function tagsQueryString(tags, itemid, result) {
           itemid,
           `${result}($${tags.length + 1}, ${itemid})${length === 1 ? '' : ','}`
         );
-}
+};
 
 module.exports = postgres => {
   return {
@@ -73,7 +73,7 @@ module.exports = postgres => {
        */
 
       const findUserQuery = {
-        text: '', // @TODO: Basic queries
+        text: 'SELECT * FROM users WHERE id = Value($1);', // @TODO: Basic queries
         values: [id]
       };
 
@@ -86,27 +86,39 @@ module.exports = postgres => {
        *  Customize your throw statements so the message can be used by the client.
        */
 
-      const user = await postgres.query(findUserQuery);
-      return user;
+      try {
+        const user = await postgres.query(findUserQuery);
+        if (!user) {
+          throw 'there is no user with matching id';
+        } else {
+          return user;
+        }
+      } catch (e) {
+        throw 'Unable to find user by id';
+      }
       // -------------------------------
     },
     async getItems(idToOmit) {
-      const items = await postgres.query({
-        /**
-         *  @TODO: Advanced queries
-         *
-         *  Get all Items. If the idToOmit parameter has a value,
-         *  the query should only return Items were the ownerid column
-         *  does not contain the 'idToOmit'
-         *
-         *  Hint: You'll need to use a conditional AND and WHERE clause
-         *  to your query text using string interpolation
-         */
+      try {
+        const items = await postgres.query({
+          /**
+           *  @TODO: Advanced queries
+           *
+           *  Get all Items. If the idToOmit parameter has a value,
+           *  the query should only return Items were the ownerid column
+           *  does not contain the 'idToOmit'
+           *
+           *  Hint: You'll need to use a conditional AND and WHERE clause
+           *  to your query text using string interpolation
+           */
 
-        text: `SELECT * FROM items WHERE ownerid=Value($1);`,
-        values: idToOmit ? [idToOmit] : []
-      });
-      return items.rows;
+          text: `SELECT * FROM items WHERE ownerid=Value($1);`,
+          values: idToOmit ? [idToOmit] : []
+        });
+        return items.rows;
+      } catch (e) {
+        throw 'Unable to retrieve list of all items';
+      }
     },
     async getItemsForUser(id) {
       const items = await postgres.query({
@@ -117,6 +129,7 @@ module.exports = postgres => {
         text: `SELECT * FROM items WHERE ownerid=Value($1) AND borrowerid is null;`,
         values: [id]
       });
+
       return items.rows;
     },
     async getBorrowedItemsForUser(id) {

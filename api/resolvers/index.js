@@ -52,14 +52,25 @@ module.exports = app => {
           throw new ApolloError(e);
         }
       },
-      async items() {
+      async items(id) {
+        try {
+          const item = await pgResource.getItems(id);
+          return item;
+        } catch (e) {
+          throw new ApolloError(e);
+        }
         // @TODO: Replace this mock return statement with the correct items from Postgres
-        return [];
+
         // -------------------------------
       },
       async tags() {
         // @TODO: Replace this mock return statement with the correct tags from Postgres
-        return [];
+        try {
+          const tag = await pgResource.getTags();
+          return tag;
+        } catch (e) {
+          throw new ApolloError(e);
+        }
         // -------------------------------
       }
     },

@@ -19,8 +19,5 @@ module.exports = app => {
     database: db,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 2000
-
-    /*  @TODO: Supply the correct configuration values to connect to postgres
-     */
   });
 };

@@ -23,7 +23,7 @@ const { UploadScalar, DateScalar } = require('../custom-types');
 
 module.exports = app => {
   return {
-    // Upload: UploadScalar,
+    Upload: UploadScalar,
     Date: DateScalar,
 
     Query: {
@@ -53,16 +53,14 @@ module.exports = app => {
           throw new ApolloError(e);
         }
       },
-      async items(parent, { id }, { pgResource }, info) {
+      async items(parent, { filter }, { pgResource }, info) {
         try {
-          const item = await pgResource.getItems(id);
+          const item = await pgResource.getItems(filter);
+          console.log(item);
           return item;
         } catch (e) {
           throw new ApolloError(e);
         }
-        // @TODO: Replace this mock return statement with the correct items from Postgres
-
-        // -------------------------------
       },
       async tags(parent, { id }, { pgResource }) {
         // @TODO: Replace this mock return statement with the correct tags from Postgres
@@ -88,11 +86,11 @@ module.exports = app => {
        *
        */
       // @TODO: Uncomment these lines after you define the User type with these fields
-      // items() {
-      //   // @TODO: Replace this mock return statement with the correct items from Postgres
-      //   return []
-      //   // -------------------------------
-      // },
+      items(parent, { id }, { pgResource }, info) {
+        // @TODO: Replace this mock return statement with the correct items from Postgres
+        console.log(id);
+        return [];
+      }
       // borrowed() {
       //   // @TODO: Replace this mock return statement with the correct items from Postgres
       //   return []

@@ -39,7 +39,7 @@ function generateToken(user, secret) {
   // -------------------------------
 }
 
-module.exports = (app) => {
+module.exports = app => {
   return {
     async signup(parent, args, context) {
       try {

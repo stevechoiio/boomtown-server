@@ -72,11 +72,6 @@ module.exports = postgres => {
        *  You'll need to complete the query first before attempting this exercise.
        */
 
-      const findUserQuery = {
-        text: 'SELECT * FROM users WHERE id = Value($1);', // @TODO: Basic queries
-        values: [id]
-      };
-
       /**
        *  Refactor the following code using the error handling logic described above.
        *  When you're done here, ensure all of the resource methods in this file
@@ -86,8 +81,14 @@ module.exports = postgres => {
        *  Customize your throw statements so the message can be used by the client.
        */
 
+      const findUserQuery = {
+        text: 'SELECT * FROM users WHERE id=$1;', // @TODO: Basic queries
+        values: [id]
+      };
+
       try {
         const user = await postgres.query(findUserQuery);
+
         if (!user) {
           throw 'there is no user with matching id';
         } else {
@@ -144,6 +145,7 @@ module.exports = postgres => {
     },
     async getTags() {
       const tags = await postgres.query({ text: `SELECT * FROM tags;` });
+
       return tags.rows;
     },
     async getTagsForItem(id) {

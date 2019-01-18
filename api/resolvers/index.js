@@ -147,8 +147,9 @@ module.exports = app => {
       },
       async borrower(item, _, { pgResource }) {
         try {
-          const borrower = await pgResource.getBorrowedItemsForUser(item.id);
-          return borrower;
+          const borrower = await pgResource.getUserById(item.borrowerid);
+
+          return borrower.rows[0];
         } catch (e) {
           throw 'unable to fetch the borrower from the items';
         }

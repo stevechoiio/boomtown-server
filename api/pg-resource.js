@@ -129,14 +129,11 @@ module.exports = postgres => {
       }
     },
     async getBorrowedItemsForUser(id) {
-      /**
-       *  @TODO: Advanced queries
-       *  Get all Items. Hint: You'll need to use a LEFT INNER JOIN among others
-       */
       const items = await postgres.query({
         text: `SELECT * FROM items WHERE borrowerid=$1;`,
         values: [id]
       });
+
       return items.rows;
     },
     async getTags() {
@@ -146,12 +143,12 @@ module.exports = postgres => {
     },
     async getTagsForItem(id) {
       const tagsQuery = {
-        text: `SELECT * FROM tags WHERE id IN (SELECT tagid FROM itemtag WHERE itemid = $1);`, // @TODO: Advanced queries
-        values: [id]
+        text: `SELECT * FROM tags WHERE id IN (SELECT tagid FROM itemtag WHERE itemid=$1 )`, // @TODO: Advanced queries
+        values: [id] // 0
       };
 
       const tags = await postgres.query(tagsQuery);
-      console.log(tags);
+
       return tags.rows;
     },
     async saveNewItem({ item, image, user }) {
@@ -198,10 +195,20 @@ module.exports = postgres => {
                 // Generate new Item query
                 // @TODO
                 // -------------------------------
+                // INSERT INTO itemtag
+
+                //                 const newItemQuery = {
+                //                   text: `INSERT INTO items (title, description, tags)
+                // VALUES ('$1', '$2', '$3')`, // @TODO: Advanced queries
+                //                   values: [title, description, tags]
+                //                 };
+
+                //                 const newItem = await postgres.query(newItemQuery);
 
                 // Insert new Item
                 // @TODO
                 // -------------------------------
+                // ' INSERT INTO item
 
                 const imageUploadQuery = {
                   text:

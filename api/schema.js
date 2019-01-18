@@ -20,7 +20,7 @@ module.exports = gql`
     title: String!
     imageurl: String
     description: String
-    itemowner: User
+    itemowner: User!
     tags: [Tag]
     created: Date!
     borrower: User
@@ -29,7 +29,7 @@ module.exports = gql`
   type User {
     id: ID!
     email: String!
-    fullname: String!
+    name: String!
     bio: String
     items: [Item]
     borrowed: [Item]
@@ -57,11 +57,14 @@ module.exports = gql`
     id: ID!
   }
 
-  #input NewItemInput {
-  # title: String!
-  # description: String
-  # tags: [AssignedTag]
-  #}
+  input NewItemInput {
+    title: String!
+    description: String
+    tags: [AssignedTag]
+  }
+  input NewDateInput {
+    date: Date!
+  }
 
   type Query {
     user(id: ID!): User
@@ -70,8 +73,8 @@ module.exports = gql`
     tags: [Tag]
   }
 
-  #type Mutation {
-  #  addItem(item: NewItemInput!): Item
-  #  addDate(date: NewDateInput!): Date
-  #}
+  type Mutation {
+    addItem(item: NewItemInput!): Upload
+    addDate(date: NewDateInput!): Date
+  }
 `;

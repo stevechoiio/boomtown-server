@@ -107,7 +107,6 @@ module.exports = postgres => {
       try {
         const items = await postgres.query(query);
 
-        console.log(`query is : ${query}`);
         return items.rows;
       } catch (e) {
         throw 'Unable to retrieve list of all items';
@@ -120,7 +119,7 @@ module.exports = postgres => {
        */
       try {
         const items = await postgres.query({
-          text: `SELECT * FROM items WHERE ownerid=Value($1) AND borrowerid is null;`,
+          text: `SELECT * FROM items WHERE ownerid=$1;`,
           values: [id]
         });
 
@@ -135,7 +134,7 @@ module.exports = postgres => {
        *  Get all Items. Hint: You'll need to use a LEFT INNER JOIN among others
        */
       const items = await postgres.query({
-        text: `SELECT * FROM items WHERE borrowerid=Value($1);`,
+        text: `SELECT * FROM items WHERE borrowerid=$1;`,
         values: [id]
       });
       return items.rows;
@@ -147,11 +146,12 @@ module.exports = postgres => {
     },
     async getTagsForItem(id) {
       const tagsQuery = {
-        text: `SELECT * FROM tags WHERE id IN (SELECT tagid FROM itemtags WHERE itemid = $1)`, // @TODO: Advanced queries
+        text: `SELECT * FROM tags WHERE id IN (SELECT tagid FROM itemtag WHERE itemid = $1);`, // @TODO: Advanced queries
         values: [id]
       };
 
       const tags = await postgres.query(tagsQuery);
+      console.log(tags);
       return tags.rows;
     },
     async saveNewItem({ item, image, user }) {

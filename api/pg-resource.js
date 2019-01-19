@@ -13,7 +13,9 @@ const tagsQueryString = (tags, itemid, result) => {
         tagsQueryString(
           tags,
           itemid,
-          `${result}($${tags.length + 1}, ${itemid})${length === 1 ? '' : ','}`
+          `${result}($${tags.length + 1}, ${itemid})${
+            tags.length === 0 ? '' : ','
+          }`
         );
 };
 
@@ -191,30 +193,20 @@ module.exports = postgres => {
               imageStream.on('end', async () => {
                 // Image has been converted, begin saving things
                 const { title, description, tags } = item;
+                // inser item to ITEM table
+                const newItemQuery = {
+                  text: `INSERT INTO items (title, description,owner.id)
+                VALUES ('$1', '$2', '$3') RETUNING *`, // @TODO: Advanced queries
+                  values: [title, description, user.id]
+                };
 
-                // Generate new Item query
-                // @TODO
-                // -------------------------------
-                // INSERT INTO itemtag
-
-                //                 const newItemQuery = {
-                //                   text: `INSERT INTO items (title, description, tags)
-                // VALUES ('$1', '$2', '$3')`, // @TODO: Advanced queries
-                //                   values: [title, description, tags]
-                //                 };
-
-                //                 const newItem = await postgres.query(newItemQuery);
-
-                // Insert new Item
-                // @TODO
-                // -------------------------------
-                // ' INSERT INTO item
-
+                const newItem = await postgres.query(newItemQuery);
+                // inser item to ITEM table
                 const imageUploadQuery = {
                   text:
                     'INSERT INTO uploads (itemid, filename, mimetype, encoding, data) VALUES ($1, $2, $3, $4, $5) RETURNING *',
                   values: [
-                    // itemid,
+                    item.id,
                     image.filename,
                     image.mimetype,
                     'base64',
@@ -226,21 +218,28 @@ module.exports = postgres => {
                 const uploadedImage = await client.query(imageUploadQuery);
                 const imageid = uploadedImage.rows[0].id;
 
-                // Generate image relation query
-                // @TODO
-                // -------------------------------
+                const newImageQuery = {
+                  text: `INSERT INTO items (imageurl)
+                VALUES ('$1') RETUNING *`, // @TODO: Advanced queries
+                  values: [image.url]
+                };
 
+                const newImage = await postgres.query(newImageQuery);
                 // Insert image
                 // @TODO
                 // -------------------------------
+                const newImage = await postgres.query(newImageQuery);
 
-                // Generate tag relationships query (use the'tagsQueryString' helper function provided)
-                // @TODO
-                // -------------------------------
+                // inser item-tag to ITEMTAG table
+                const newTag = tagsQueryString(tags, item.id);
 
-                // Insert tags
-                // @TODO
-                // -------------------------------
+                const newItemTagQuery = {
+                  text: `INSERT INTO itemtag (tagid,itemid)
+                VALUES ${newTag}`, // @TODO: Advanced queries
+                  values: [...tags]
+                };
+
+                const newItemTag = await postgres.query(newItemTagQuery);
 
                 // Commit the entire transaction!
                 client.query('COMMIT', err => {
@@ -250,7 +249,7 @@ module.exports = postgres => {
                   // release the client back to the pool
                   done();
                   // Uncomment this resolve statement when you're ready!
-                  // resolve(newItem.rows[0])
+                  resolve(newItem.rows[0]);
                   // -------------------------------
                 });
               });

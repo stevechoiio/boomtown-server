@@ -153,125 +153,154 @@ module.exports = postgres => {
 
       return tags.rows;
     },
-    async saveNewItem({ item, image, user }) {
-      /**
-       *  @TODO: Adding a New Item
-       *
-       *  Adding a new Item to Posgtres is the most advanced query.
-       *  It requires 3 separate INSERT statements.
-       *
-       *  All of the INSERT statements must:
-       *  1) Proceed in a specific order.
-       *  2) Succeed for the new Item to be considered added
-       *  3) If any of the INSERT queries fail, any successful INSERT
-       *     queries should be 'rolled back' to avoid 'orphan' data in the database.
-       *
-       *  To achieve #3 we'll ue something called a Postgres Transaction!
-       *  The code for the transaction has been provided for you, along with
-       *  helpful comments to help you get started.
-       *
-       *  Read the method and the comments carefully before you begin.
-       */
+    // async saveNewItem({ item, user }) {
+    //   return new Promise((resolve, reject) => {
+    //     postgres.connect((err, client, done) => {
+    //       try {
+    //         // Begin postgres transaction
+    //         client.query('BEGIN', err => {
+    //           // Convert image (file stream) to Base64
+    //           const imageStream = image.stream.pipe(strs('base64'));
 
-      return new Promise((resolve, reject) => {
-        /**
-         * Begin transaction by opening a long-lived connection
-         * to a client from the client pool.
-         */
-        postgres.connect((err, client, done) => {
-          try {
-            // Begin postgres transaction
-            client.query('BEGIN', err => {
-              // Convert image (file stream) to Base64
-              const imageStream = image.stream.pipe(strs('base64'));
+    //           let base64Str = '';
+    //           imageStream.on('data', data => {
+    //             base64Str += data;
+    //           });
 
-              let base64Str = '';
-              imageStream.on('data', data => {
-                base64Str += data;
-              });
+    //           imageStream.on('end', async () => {
+    //             // Image has been converted, begin saving things
+    //             const { title, description, tags } = item;
+    //             // inser item to ITEM table
+    //             const newItemQuery = {
+    //               text: `INSERT INTO items (title, description,ownerid)
+    //             VALUES ('$1', '$2', '$3') RETUNING *`, // @TODO: Advanced queries
+    //               values: [title, description, user.id]
+    //             };
 
-              imageStream.on('end', async () => {
-                // Image has been converted, begin saving things
-                const { title, description, tags } = item;
-                // inser item to ITEM table
-                const newItemQuery = {
-                  text: `INSERT INTO items (title, description,owner.id)
-                VALUES ('$1', '$2', '$3') RETUNING *`, // @TODO: Advanced queries
-                  values: [title, description, user.id]
-                };
+    //             const newItem = await postgres.query(newItemQuery);
+    //             // inser item to ITEM table
+    //             const imageUploadQuery = {
+    //               text:
+    //                 'INSERT INTO uploads (itemid, filename, mimetype, encoding, data) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+    //               values: [
+    //                 item.id,
+    //                 image.filename,
+    //                 image.mimetype,
+    //                 'base64',
+    //                 base64Str
+    //               ]
+    //             };
 
-                const newItem = await postgres.query(newItemQuery);
-                // inser item to ITEM table
-                const imageUploadQuery = {
-                  text:
-                    'INSERT INTO uploads (itemid, filename, mimetype, encoding, data) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-                  values: [
-                    item.id,
-                    image.filename,
-                    image.mimetype,
-                    'base64',
-                    base64Str
-                  ]
-                };
+    //             // Upload image
+    //             const uploadedImage = await client.query(imageUploadQuery);
+    //             const imageid = uploadedImage.rows[0].id;
 
-                // Upload image
-                const uploadedImage = await client.query(imageUploadQuery);
-                const imageid = uploadedImage.rows[0].id;
+    //             const newImageQuery = {
+    //               text: `INSERT INTO items (imageurl)
+    //             VALUES ('$1') RETUNING *`, // @TODO: Advanced queries
+    //               values: [image.url]
+    //             };
 
-                const newImageQuery = {
-                  text: `INSERT INTO items (imageurl)
-                VALUES ('$1') RETUNING *`, // @TODO: Advanced queries
-                  values: [image.url]
-                };
+    //             // Insert image
+    //             // @TODO
+    //             // -------------------------------
+    //             const newImage = await postgres.query(newImageQuery);
 
-                const newImage = await postgres.query(newImageQuery);
-                // Insert image
-                // @TODO
-                // -------------------------------
-                const newImage = await postgres.query(newImageQuery);
+    //             // inser item-tag to ITEMTAG table
+    //             const newTag = tagsQueryString(tags.id, item.id);
 
-                // inser item-tag to ITEMTAG table
-                const newTag = tagsQueryString(tags, item.id);
+    //             const newItemTagQuery = {
+    //               text: `INSERT INTO itemtag (tagid,itemid)
+    //             VALUES ${newTag}`, // @TODO: Advanced queries
+    //               values: [...tags]
+    //             };
 
-                const newItemTagQuery = {
-                  text: `INSERT INTO itemtag (tagid,itemid)
-                VALUES ${newTag}`, // @TODO: Advanced queries
-                  values: [...tags]
-                };
+    //             const newItemTag = await postgres.query(newItemTagQuery);
 
-                const newItemTag = await postgres.query(newItemTagQuery);
+    //             // Commit the entire transaction!
+    //             client.query('COMMIT', err => {
+    //               if (err) {
+    //                 throw err;
+    //               }
+    //               // release the client back to the pool
+    //               done();
+    //               // Uncomment this resolve statement when you're ready!
+    //               resolve(newItem.rows[0]);
+    //               // -------------------------------
+    //             });
+    //           });
+    //         });
+    //       } catch (e) {
+    //         // Something went wrong
+    //         client.query('ROLLBACK', err => {
+    //           if (err) {
+    //             reject(err);
+    //           }
+    //           // release the client back to the pool
+    //           done();
+    //         });
+    //         switch (true) {
+    //           case /uploads_itemid_key/.test(e.message):
+    //             throw 'This item already has an image.';
+    //           default:
+    //             throw e;
+    //         }
+    //       }
+    //     });
+    //   });
+    // }
+    async saveNewItem({ item, user }) {
+      postgres.connect((err, client, done) => {
+        try {
+          // Begin postgres transaction
+          client.query('BEGIN', async err => {
+            const { title, description, tags } = item;
 
-                // Commit the entire transaction!
-                client.query('COMMIT', err => {
-                  if (err) {
-                    throw err;
-                  }
-                  // release the client back to the pool
-                  done();
-                  // Uncomment this resolve statement when you're ready!
-                  resolve(newItem.rows[0]);
-                  // -------------------------------
-                });
-              });
-            });
-          } catch (e) {
-            // Something went wrong
-            client.query('ROLLBACK', err => {
-              if (err) {
-                throw err;
-              }
-              // release the client back to the pool
-              done();
-            });
-            switch (true) {
-              case /uploads_itemid_key/.test(e.message):
-                throw 'This item already has an image.';
-              default:
-                throw e;
-            }
-          }
-        });
+            // inser item to ITEM table
+
+            const newItemQuery = {
+              text: `INSERT INTO items(id,title, description,ownerid)
+              VALUES ($1,$2,$3,$4) RETURNING *;`, // @TODO: Advanced queries
+              values: [6, title, description, user.id]
+            };
+
+            const newItem = await client.query(newItemQuery);
+
+            // inser item-tag to ITEMTAG table
+            // const tagQuery = tagsQueryString(tags, item.id);
+            // const newItemTagQuery = {
+            //   text: `INSERT INTO itemtag (tagid,itemid)
+            //   VALUES $1;`, // @TODO: Advanced queries
+            //   values: [tagQuery]
+            // };
+
+            // const newItemTag = await client.query(newItemTagQuery);
+            console.log(newItem);
+
+            return newItem.rows[0];
+          });
+        } catch (e) {
+          return e;
+        }
       });
     }
   };
 };
+/**
+ *  @TODO: Adding a New Item
+ *
+ *  Adding a new Item to Posgtres is the most advanced query.
+ *  It requires 3 separate INSERT statements.
+ *
+ *  All of the INSERT statements must:
+ *  1) Proceed in a specific order.
+ *  2) Succeed for the new Item to be considered added
+ *  3) If any of the INSERT queries fail, any successful INSERT
+ *     queries should be 'rolled back' to avoid 'orphan' data in the database.
+ *
+ *  To achieve #3 we'll ue something called a Postgres Transaction!
+ *  The code for the transaction has been provided for you, along with
+ *  helpful comments to help you get started.
+ *
+ *  Read the method and the comments carefully before you begin.
+ */

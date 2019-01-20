@@ -167,27 +167,17 @@ module.exports = app => {
       // ...authMutations(app),
       // -------------------------------
 
-      async addItem(parent, { item, image }, { pgResource, token }, info) {
-        /**
-         *  @TODO: Destructuring
-         *
-         *  The 'args' and 'context' parameters of this resolver can be destructured
-         *  to make things more readable and avoid duplication.
-         *
-         *  When you're finished with this resolver, destructure all necessary
-         *  parameters in all of your resolver functions.
-         *
-         *  Again, you may look at the user resolver for an example of what
-         *  destructuring should look like.
-         */
+      async addItem(parent, { item }, { pgResource, token }, info) {
         try {
           // const image = await image;
-          const user = await jwt.decode(token, app.get('JWT_SECRET'));
+          // const user = await jwt.decode(token, app.get('JWT_SECRET'));
+          const user = { id: 3 };
           const newItem = await pgResource.saveNewItem({
             item,
-            image,
+
             user
           });
+
           return newItem;
         } catch (e) {
           throw 'unable to add new Item';

@@ -174,10 +174,10 @@ module.exports = app => {
           const user = { id: 3 };
           const newItem = await pgResource.saveNewItem({
             item,
-
             user
           });
-
+          console.log('newItem is::::');
+          console.log(newItem);
           return newItem;
         } catch (e) {
           throw 'unable to add new Item';

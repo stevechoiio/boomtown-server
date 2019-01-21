@@ -77,3 +77,20 @@ module.exports = gql`
     addItem(item: NewItemInput!): Item
   }
 `;
+
+/*
+mutation newItem($title:String!,
+  $description:String,
+  $tags: [AssignedTag]){
+  addItem(item: {
+    title:$title
+    description:$description
+    tags:$tags}
+  ){
+    id
+    title
+    description
+    created
+  }}
+
+*/

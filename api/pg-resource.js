@@ -256,27 +256,38 @@ module.exports = postgres => {
           client.query('BEGIN', async err => {
             const { title, description, tags } = item;
 
+            const tagArray = tags[0]['id'];
+            // console.log('tags is:::');
+            // console.log(tagArray);
+
             // inser item to ITEM table
 
             const newItemQuery = {
-              text: `INSERT INTO items(id,title, description,ownerid)
-              VALUES ($1,$2,$3,$4) RETURNING *;`, // @TODO: Advanced queries
-              values: [6, title, description, user.id]
+              text: `INSERT INTO items(title, description,ownerid)
+              VALUES ($1,$2,$3) RETURNING *;`, // @TODO: Advanced queries
+              values: [title, description, user.id]
             };
 
-            const newItem = await client.query(newItemQuery);
+            const newItem = await postgres.query(newItemQuery);
+            // console.log(`the newItemId is : ${newItem.rows[0].id}`);
 
             // inser item-tag to ITEMTAG table
-            // const tagQuery = tagsQueryString(tags, item.id);
-            // const newItemTagQuery = {
-            //   text: `INSERT INTO itemtag (tagid,itemid)
-            //   VALUES $1;`, // @TODO: Advanced queries
-            //   values: [tagQuery]
-            // };
+            const tagQuery = tagsQueryString(tags, newItem.rows[0].id, '');
+            // console.log('tagQuery is:');
+            // console.log(tagQuery);
 
-            // const newItemTag = await client.query(newItemTagQuery);
-            console.log(newItem);
+            const newItemTagQuery = {
+              text: `INSERT INTO itemtag (tagid,itemid)
+              VALUES ${tagQuery}`, // @TODO: Advanced queries
+              values: [tagArray]
+            };
 
+            const newItemTag = await postgres.query(newItemTagQuery);
+            // console.log('newItemTag is:');
+            // console.log(newItemTag);
+
+            console.log('newItem.rows[0] is:::');
+            console.log(newItem.rows[0]);
             return newItem.rows[0];
           });
         } catch (e) {

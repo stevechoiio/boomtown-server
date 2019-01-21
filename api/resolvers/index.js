@@ -128,9 +128,9 @@ module.exports = app => {
       async itemowner(item, _, { pgResource }) {
         // @TODO: Replace this mock return statement with the correct user from Postgres
         try {
-          const itemOwner = pgResource.getUserById(item.ownerid);
-
-          return itemOwner;
+          const itemOwner = await pgResource.getUserById(item.ownerid);
+          console.log(itemOwner);
+          return itemOwner.rows[0];
         } catch (e) {
           throw new ApolloError(`itemowner error : ${e}`);
         }
@@ -176,8 +176,7 @@ module.exports = app => {
             item,
             user
           });
-          console.log('newItem is::::');
-          console.log(newItem);
+
           return newItem;
         } catch (e) {
           throw 'unable to add new Item';

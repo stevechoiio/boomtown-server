@@ -250,7 +250,7 @@ module.exports = postgres => {
     //   });
     // }
     async saveNewItem({ item, user }) {
-      postgres.connect((err, client, done) => {
+      const createdItem = await postgres.connect((err, client, done) => {
         try {
           // Begin postgres transaction
           client.query('BEGIN', async err => {
@@ -286,13 +286,15 @@ module.exports = postgres => {
             const newItemTag = await postgres.query(newItemTagQuery);
             // console.log('newItemTag is:');
             // console.log(newItemTag);
-
+            console.log(newItem);
             return newItem;
           });
-        } catch (e) {
-          return e;
+        } catch (err) {
+          return err;
         }
       });
+      console.log(createdItem);
+      return createdItem;
     }
   };
 };

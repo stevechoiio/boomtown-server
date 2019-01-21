@@ -257,6 +257,7 @@ module.exports = postgres => {
             const { title, description, tags } = item;
 
             const tagArray = tags[0]['id'];
+
             // console.log('tags is:::');
             // console.log(tagArray);
 
@@ -286,9 +287,7 @@ module.exports = postgres => {
             // console.log('newItemTag is:');
             // console.log(newItemTag);
 
-            console.log('newItem.rows[0] is:::');
-            console.log(newItem.rows[0]);
-            return newItem.rows[0];
+            return newItem;
           });
         } catch (e) {
           return e;

@@ -176,8 +176,8 @@ module.exports = app => {
             item,
             user
           });
-
-          return newItem;
+          console.log(newItem.rows[0]);
+          return newItem.rows[0];
         } catch (e) {
           throw 'unable to add new Item';
         }
